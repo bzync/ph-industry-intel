@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     name: Deploy via SSH
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
