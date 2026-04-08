@@ -12,7 +12,6 @@ services:
       - proxy_manager_net
 
 networks:
-  ph_address_intel_net: 
+  ph_industry_intel_net:
   proxy_manager_net:
     external: true
-
