@@ -7,7 +7,7 @@
   },
   "counts": {
     "sections": 21,
-    "divisions": 89,
+    "divisions": 88,
     "groups": 245,
     "classes": 519,
     "subclasses": 1360
@@ -15,7 +15,7 @@
   "sections": [
     {
       "code": "A",
-      "title": "Section A",
+      "title": "AGRICULTURE, FORESTRY AND FISHING",
       "divisions": [
         {
           "code": "01",
@@ -1059,7 +1059,7 @@
     },
     {
       "code": "B",
-      "title": "No. of Estabs",
+      "title": "MINING AND QUARRYING",
       "divisions": [
         {
           "code": "05",
@@ -1377,7 +1377,7 @@
     },
     {
       "code": "C",
-      "title": "Section C",
+      "title": "MANUFACTURING",
       "divisions": [
         {
           "code": "10",
@@ -5155,7 +5155,7 @@
     },
     {
       "code": "D",
-      "title": "No. of Estabs",
+      "title": "ELECTRICITY, GAS, STEAM AND AIR CONDITIONING SUPPLY",
       "divisions": [
         {
           "code": "35",
@@ -5223,7 +5223,7 @@
     },
     {
       "code": "E",
-      "title": "No. of Estabs",
+      "title": "WATER SUPPLY; SEWERAGE, WASTE MANAGEMENT AND REMEDIATION ACTIVITIES",
       "divisions": [
         {
           "code": "36",
@@ -5369,7 +5369,7 @@
     },
     {
       "code": "F",
-      "title": "Section F",
+      "title": "CONSTRUCTION",
       "divisions": [
         {
           "code": "41",
@@ -5583,13 +5583,8 @@
     },
     {
       "code": "G",
-      "title": "Section G",
+      "title": "WHOLESALE AND RETAIL TRADE; REPAIR OF MOTOR VEHICLES AND MOTORCYCLES",
       "divisions": [
-        {
-          "code": "45",
-          "title": "includes all activities related to the sale and repair of motor vehicles and motorcycles, while Division 46 and Division 47 include all other sale activities. The distinction between Division 46 (wholesale) and Division 47 (retail sale) is based on the predominant type of customer.",
-          "groups": []
-        },
         {
           "code": "45",
           "title": "WHOLESALE AND RETAIL TRADE AND REPAIR OF MOTOR VEHICLES AND MOTORCYCLES",
@@ -6788,7 +6783,7 @@
     },
     {
       "code": "H",
-      "title": "No. of Estabs",
+      "title": "TRANSPORTATION AND STORAGE",
       "divisions": [
         {
           "code": "49",
@@ -7262,7 +7257,7 @@
     },
     {
       "code": "I",
-      "title": "No. of Estabs",
+      "title": "ACCOMMODATION AND FOOD SERVICE ACTIVITIES",
       "divisions": [
         {
           "code": "55",
@@ -7450,7 +7445,7 @@
     },
     {
       "code": "J",
-      "title": "Section J",
+      "title": "INFORMATION AND COMMUNICATION",
       "divisions": [
         {
           "code": "58",
@@ -7888,7 +7883,7 @@
     },
     {
       "code": "K",
-      "title": "Section K",
+      "title": "FINANCIAL AND INSURANCE ACTIVITIES",
       "divisions": [
         {
           "code": "64",
@@ -8288,7 +8283,7 @@
     },
     {
       "code": "L",
-      "title": "No. of estabs",
+      "title": "REAL ESTATE ACTIVITIES",
       "divisions": [
         {
           "code": "68",
@@ -8376,7 +8371,7 @@
     },
     {
       "code": "M",
-      "title": "DESCRIPTION",
+      "title": "PROFESSIONAL, SCIENTIFIC AND TECHNICAL ACTIVITIES",
       "divisions": [
         {
           "code": "69",
@@ -8764,7 +8759,7 @@
     },
     {
       "code": "N",
-      "title": "Section N",
+      "title": "ADMINISTRATIVE AND SUPPORT SERVICE ACTIVITIES",
       "divisions": [
         {
           "code": "77",
@@ -9392,7 +9387,7 @@
     },
     {
       "code": "O",
-      "title": "Section O",
+      "title": "PUBLIC ADMINISTRATION AND DEFENCE; COMPULSORY SOCIAL SECURITY",
       "divisions": [
         {
           "code": "84",
@@ -9512,7 +9507,7 @@
     },
     {
       "code": "P",
-      "title": "Section P",
+      "title": "EDUCATION",
       "divisions": [
         {
           "code": "85",
@@ -9746,7 +9741,7 @@
     },
     {
       "code": "Q",
-      "title": "No. of estabs",
+      "title": "HUMAN HEALTH AND SOCIAL WORK ACTIVITIES",
       "divisions": [
         {
           "code": "86",
@@ -10038,7 +10033,7 @@
     },
     {
       "code": "R",
-      "title": "Section R",
+      "title": "ARTS, ENTERTAINMENT AND RECREATION",
       "divisions": [
         {
           "code": "90",
@@ -10242,7 +10237,7 @@
     },
     {
       "code": "S",
-      "title": "Description",
+      "title": "OTHER SERVICE ACTIVITIES",
       "divisions": [
         {
           "code": "94",
@@ -10586,7 +10581,7 @@
     },
     {
       "code": "T",
-      "title": "Section T",
+      "title": "ACTIVITIES OF HOUSEHOLDS AS EMPLOYERS; UNDIFFERENTIATED GOODS- AND SERVICES-PRODUCING ACTIVITIES OF HOUSEHOLDS FOR OWN USE",
       "divisions": [
         {
           "code": "97",
@@ -10652,7 +10647,7 @@
     },
     {
       "code": "U",
-      "title": "Section U",
+      "title": "ACTIVITIES OF EXTRATERRITORIAL ORGANIZATIONS AND BODIES",
       "divisions": [
         {
           "code": "99",

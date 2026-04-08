@@ -272,7 +272,9 @@ export function search(query: string, options: SearchOptions = {}): SearchResult
 
   if (fuzzy) {
     const score = (title: string, code: string): number => {
-      const scoreTitle = bigramScore(normalized, normalize(title))
+      const normTitle = normalize(title)
+      const wordMax = Math.max(...normTitle.split(/\s+/).map(w => bigramScore(normalized, w)))
+      const scoreTitle = Math.max(bigramScore(normalized, normTitle), wordMax)
       const scoreCode = bigramScore(normalized, normalize(code))
       return Math.max(scoreTitle, scoreCode)
     }
