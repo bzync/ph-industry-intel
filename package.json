@@ -1,6 +1,6 @@
 {
   "name": "@bzync/ph-industry-intel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Headless Philippine industry lookup library with official PSIC hierarchy and search utilities",
   "keywords": [
     "philippines",
