@@ -1,8 +1,18 @@
-version: '3.8'
 services:
-  app:
-    image: node:20
-    working_dir: /workspace
-    volumes:
-      - ./:/workspace
-    command: sh -c "npm install && npm run build"
+  docs:
+    container_name: 'ph-industry-intel-docs'
+    build:
+      context: .
+      dockerfile: docs/Dockerfile
+    ports:
+      - "8092:80"
+    restart: unless-stopped
+    networks:
+      - ph_industry_intel_net
+      - proxy_manager_net
+
+networks:
+  ph_address_intel_net: 
+  proxy_manager_net:
+    external: true
+
