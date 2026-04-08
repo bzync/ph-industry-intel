@@ -8,7 +8,7 @@ export default function Footer() {
           <span className="text-primary font-mono font-semibold">PH</span>
           <span className="text-foreground-400">Industry Library</span>
           <Separator orientation="vertical" className="h-4" />
-          <Chip size="sm" variant="soft" className="font-mono">v0.1.0</Chip>
+          <Chip size="sm" variant="soft" className="font-mono">v0.1.2</Chip>
         </div>
 
         <div className="flex items-center gap-5">
