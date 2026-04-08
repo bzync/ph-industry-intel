@@ -1,5 +1,8 @@
 name: Publish Package
 
+permissions:
+  contents: read
+
 on:
   push:
     tags:
