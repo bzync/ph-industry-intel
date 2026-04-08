@@ -244,14 +244,14 @@ export default function CascadeDemo() {
               { label: 'Subclass', item: subclass },
             ].map(({ label, item }) =>
               item ? (
-                <div key={label} className="flex items-center gap-3">
+                <div key={label} className="flex items-center gap-3 overflow-x-auto">
                   <Chip size="sm" variant="soft" className="shrink-0 w-20 justify-center">
                     {label}
                   </Chip>
                   <code className="font-mono text-xs bg-content2 text-foreground-600 px-2 py-0.5 rounded shrink-0">
                     {item.code}
                   </code>
-                  <span className="text-sm text-foreground truncate">{item.title}</span>
+                  <span className="text-sm text-foreground whitespace-nowrap">{item.title}</span>
                 </div>
               ) : null,
             )}

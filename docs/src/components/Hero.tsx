@@ -38,7 +38,7 @@ export default function Hero() {
           <p className="text-base sm:text-lg text-foreground-500 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
             Framework-agnostic TypeScript library for PSIC code lookup, hierarchy traversal,
             and full-text industry search across the official
-            section&nbsp;→&nbsp;division&nbsp;→&nbsp;group&nbsp;→&nbsp;class&nbsp;→&nbsp;subclass
+            section → division → group → class → subclass
             structure. Powered by official{' '}
             <span className="text-foreground font-medium">PSA&nbsp;PSIC data</span>.
           </p>
