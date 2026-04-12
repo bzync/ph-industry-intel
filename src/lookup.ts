@@ -2,6 +2,7 @@ import psic from './data/psic.json'
 import flat from './data/psic-flat.json'
 import type {
   PsicClass,
+  PsicCodeValidation,
   PsicDataset,
   PsicDivision,
   PsicFlatEntry,
@@ -14,6 +15,17 @@ import type {
   SearchResult,
   PsicCodeLevel,
 } from './types'
+
+// ─── Security constants ───────────────────────────────────────────────────────
+
+/** Maximum accepted query length for search functions. Queries exceeding this are rejected. */
+export const PSIC_MAX_QUERY_LENGTH = 200
+
+/** Maximum number of results that search functions will return. */
+export const PSIC_MAX_RESULT_LIMIT = 200
+
+const DEFAULT_RESULT_LIMIT = 20
+const MIN_FUZZY_LENGTH = 2
 
 const dataset = psic as PsicDataset
 const flatEntries = flat as PsicFlatEntry[]
@@ -73,8 +85,17 @@ for (const entry of flatEntries) {
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
+function isNonEmptyString(v: unknown): v is string {
+  return typeof v === 'string' && v.length > 0
+}
+
 function normalize(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, ' ')
+  return value.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function clampLimit(limit: unknown): number {
+  if (typeof limit !== 'number' || !Number.isFinite(limit) || limit <= 0) return DEFAULT_RESULT_LIMIT
+  return Math.min(Math.floor(limit), PSIC_MAX_RESULT_LIMIT)
 }
 
 function makePathFromFlatEntry(entry: PsicFlatEntry): PsicPath {
@@ -254,6 +275,9 @@ export function getNode(code: string): PsicNode | null {
 // ─── Search ───────────────────────────────────────────────────────────────────
 
 export function search(query: string, options: SearchOptions = {}): SearchResult[] {
+  if (typeof query !== 'string') return []
+  if (query.length > PSIC_MAX_QUERY_LENGTH) return []
+
   const normalized = normalize(query)
   if (!normalized) return []
 
@@ -261,7 +285,7 @@ export function search(query: string, options: SearchOptions = {}): SearchResult
   const exact = options.exact ?? false
   const startsWith = options.startsWith ?? false
   const fuzzy = options.fuzzy ?? false
-  const limit = options.limit ?? 20
+  const limit = clampLimit(options.limit)
 
   const results: SearchResult[] = []
 
@@ -271,6 +295,8 @@ export function search(query: string, options: SearchOptions = {}): SearchResult
   })
 
   if (fuzzy) {
+    if (normalized.length < MIN_FUZZY_LENGTH) return []
+
     const score = (title: string, code: string): number => {
       const normTitle = normalize(title)
       const wordMax = Math.max(...normTitle.split(/\s+/).map(w => bigramScore(normalized, w)))
@@ -358,6 +384,28 @@ export function search(query: string, options: SearchOptions = {}): SearchResult
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
-export function isValidCode(code: string): boolean {
+export function isValidCode(code: unknown): boolean {
+  if (!isNonEmptyString(code)) return false
+  if (code.length > 5) return false
   return getNode(code) !== null
+}
+
+export function validatePsicCode(code: unknown): PsicCodeValidation {
+  if (!isNonEmptyString(code)) return { valid: false, level: null, message: 'Code must be a non-empty string' }
+  if (code.length > 5) return { valid: false, level: null, message: 'PSIC codes are at most 5 characters' }
+  const level = detectLevel(code)
+  if (!level) return { valid: false, level: null, message: 'Invalid PSIC code format' }
+  const node = getNode(code)
+  if (!node) return { valid: false, level, message: 'Code not found in dataset' }
+  return { valid: true, level }
+}
+
+/**
+ * Hardened search wrapper that accepts unknown input and enforces all safety limits.
+ * Prefer this over `search()` when the query originates from untrusted or untyped sources.
+ */
+export function safeSearch(query: unknown, options: SearchOptions = {}): SearchResult[] {
+  if (!isNonEmptyString(query)) return []
+  if (query.length > PSIC_MAX_QUERY_LENGTH) return []
+  return search(query, options)
 }

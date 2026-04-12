@@ -1,19 +1,16 @@
-name: Publish Package
-
-permissions:
-  contents: read
+name: CI
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  publish:
+  ci:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Required for npm provenance (OIDC trusted publishing)
 
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +18,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
       - name: Install dependencies
@@ -41,8 +37,3 @@ jobs:
 
       - name: Verify published files (dry run)
         run: npm pack --dry-run
-
-      - name: Publish to npm with provenance
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

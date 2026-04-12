@@ -137,5 +137,64 @@ getPath('62011')
 ## Data source
 Bundled from the official PSIC hierarchy prepared from the PSA-issued 2019 updates to the 2009 PSIC.
 
+---
+
+## Security
+
+### Threat model
+
+`@bzync/ph-industry-intel` is a **static, offline library** with zero runtime dependencies and no network access. The attack surface at runtime is limited to:
+
+- Public API input handling
+- The integrity of the bundled JSON dataset
+
+The library does **not**:
+- Make network requests
+- Execute dynamic code
+- Access the filesystem at runtime
+- Accept executable input
+
+### Input safety
+
+All public search and lookup functions validate inputs and enforce safety limits:
+
+| Constant | Value | Purpose |
+|---|---|---|
+| `PSIC_MAX_QUERY_LENGTH` | 200 | Queries longer than this are rejected |
+| `PSIC_MAX_RESULT_LIMIT` | 200 | Result counts are clamped to this ceiling |
+
+For inputs from untrusted or untyped sources (e.g., user-submitted form data in plain JavaScript), prefer the hardened wrapper:
+
+```ts
+import { safeSearch, validatePsicCode } from '@bzync/ph-industry-intel'
+
+// Accepts unknown type — safe to call with unvalidated input
+const results = safeSearch(req.query.industry, { limit: 10 })
+
+// Detailed validation with error message
+const { valid, level, message } = validatePsicCode(req.body.psicCode)
+if (!valid) throw new Error(message)
+```
+
+`search()` and `isValidCode()` also guard against non-string inputs, oversized strings, and uncapped limits.
+
+### Data provenance
+
+The bundled PSIC dataset is generated from the official PSA-issued Excel file (2019 updates to the 2009 PSIC). The transformation script (`scripts/prepare-psic-data.ts`) is committed to the repository. Dataset changes between versions are visible via git diff on `src/data/`.
+
+### Release integrity
+
+Published releases include **npm provenance attestations** linking each package version to the exact commit and CI workflow run that produced it. Verify with:
+
+```bash
+npm audit signatures
+```
+
+### Reporting vulnerabilities
+
+Please report security issues privately. See [SECURITY.md](./SECURITY.md) for the full policy, scope, and response SLA.
+
+---
+
 ## License
 MIT

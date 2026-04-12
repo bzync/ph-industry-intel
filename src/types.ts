@@ -93,3 +93,9 @@ export interface SearchResult extends PsicNode {
   score?: number
   path?: PsicPath
 }
+
+export interface PsicCodeValidation {
+  valid: boolean
+  level: PsicCodeLevel | null
+  message?: string
+}

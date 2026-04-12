@@ -1,6 +1,7 @@
 export type {
   PsicClass,
   PsicCodeLevel,
+  PsicCodeValidation,
   PsicCounts,
   PsicDataset,
   PsicDivision,
@@ -34,5 +35,9 @@ export {
   getSubclass,
   getSubclasses,
   isValidCode,
+  PSIC_MAX_QUERY_LENGTH,
+  PSIC_MAX_RESULT_LIMIT,
+  safeSearch,
   search,
+  validatePsicCode,
 } from './lookup'

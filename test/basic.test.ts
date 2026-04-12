@@ -18,7 +18,11 @@ import {
   getSubclass,
   getSubclasses,
   isValidCode,
+  PSIC_MAX_QUERY_LENGTH,
+  PSIC_MAX_RESULT_LIMIT,
+  safeSearch,
   search,
+  validatePsicCode,
 } from '../src/index'
 
 describe('@bzync/ph-industry-intel', () => {
@@ -287,5 +291,221 @@ describe('@bzync/ph-industry-intel', () => {
     const results = search('xyzxyzxyzxyz', { fuzzy: true })
     // any matches that do come back should have a non-trivial score
     results.forEach((r) => expect(r.score).toBeGreaterThan(0))
+  })
+
+  // ─── Security: search hardening ───────────────────────────────────────────
+
+  it('search rejects query exceeding MAX_QUERY_LENGTH', () => {
+    const long = 'a'.repeat(PSIC_MAX_QUERY_LENGTH + 1)
+    expect(search(long)).toEqual([])
+  })
+
+  it('search clamps limit to PSIC_MAX_RESULT_LIMIT', () => {
+    const results = search('a', { limit: 999999 })
+    expect(results.length).toBeLessThanOrEqual(PSIC_MAX_RESULT_LIMIT)
+  })
+
+  it('search treats non-finite limit as default', () => {
+    const withInfinity = search('a', { limit: Infinity })
+    const withNaN = search('a', { limit: NaN })
+    expect(withInfinity.length).toBeLessThanOrEqual(PSIC_MAX_RESULT_LIMIT)
+    expect(withNaN.length).toBeLessThanOrEqual(PSIC_MAX_RESULT_LIMIT)
+  })
+
+  it('search treats negative limit as default', () => {
+    const results = search('a', { limit: -1 })
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.length).toBeLessThanOrEqual(PSIC_MAX_RESULT_LIMIT)
+  })
+
+  it('search handles regex special characters safely', () => {
+    const specials = ['.*+?^${}()|[]\\', '(unclosed', '[invalid', '^$.*?+']
+    for (const q of specials) {
+      expect(() => search(q)).not.toThrow()
+    }
+  })
+
+  it('search handles Unicode combining marks and non-NFC strings', () => {
+    // NFC: é (U+00E9) vs NFD: e + combining accent (U+0065 U+0301)
+    const nfd = 'e\u0301'
+    expect(() => search(nfd)).not.toThrow()
+    expect(Array.isArray(search(nfd))).toBe(true)
+  })
+
+  it('fuzzy search returns empty for single-char query (below MIN_FUZZY_LENGTH)', () => {
+    const results = search('a', { fuzzy: true })
+    expect(results).toEqual([])
+  })
+
+  it('search returns empty array for non-string input via safeSearch', () => {
+    expect(safeSearch(null)).toEqual([])
+    expect(safeSearch(undefined)).toEqual([])
+    expect(safeSearch(123)).toEqual([])
+    expect(safeSearch([])).toEqual([])
+    expect(safeSearch({})).toEqual([])
+    expect(safeSearch(true)).toEqual([])
+  })
+
+  it('safeSearch rejects query exceeding MAX_QUERY_LENGTH', () => {
+    const long = 'x'.repeat(PSIC_MAX_QUERY_LENGTH + 1)
+    expect(safeSearch(long)).toEqual([])
+  })
+
+  it('safeSearch returns results for valid input', () => {
+    const results = safeSearch('software', { levels: ['subclass'], limit: 5 })
+    expect(Array.isArray(results)).toBe(true)
+    expect(results.length).toBeGreaterThan(0)
+  })
+
+  // ─── Security: isValidCode hardening ──────────────────────────────────────
+
+  it('isValidCode rejects non-string inputs', () => {
+    expect(isValidCode(null as unknown as string)).toBe(false)
+    expect(isValidCode(undefined as unknown as string)).toBe(false)
+    expect(isValidCode(62011 as unknown as string)).toBe(false)
+    expect(isValidCode({} as unknown as string)).toBe(false)
+    expect(isValidCode([] as unknown as string)).toBe(false)
+  })
+
+  it('isValidCode rejects strings longer than 5 chars', () => {
+    expect(isValidCode('620111')).toBe(false)
+    expect(isValidCode('A'.repeat(100))).toBe(false)
+  })
+
+  it('isValidCode rejects prototype pollution patterns', () => {
+    expect(isValidCode('__proto__')).toBe(false)
+    expect(isValidCode('constructor')).toBe(false)
+    expect(isValidCode('toString')).toBe(false)
+  })
+
+  // ─── Security: validatePsicCode ───────────────────────────────────────────
+
+  it('validatePsicCode returns valid:true for known codes at all levels', () => {
+    expect(validatePsicCode('A').valid).toBe(true)
+    expect(validatePsicCode('62').valid).toBe(true)
+    expect(validatePsicCode('620').valid).toBe(true)
+    expect(validatePsicCode('6201').valid).toBe(true)
+    expect(validatePsicCode('62011').valid).toBe(true)
+  })
+
+  it('validatePsicCode returns correct level', () => {
+    expect(validatePsicCode('A').level).toBe('section')
+    expect(validatePsicCode('62').level).toBe('division')
+    expect(validatePsicCode('620').level).toBe('group')
+    expect(validatePsicCode('6201').level).toBe('class')
+    expect(validatePsicCode('62011').level).toBe('subclass')
+  })
+
+  it('validatePsicCode rejects non-string inputs with message', () => {
+    const r = validatePsicCode(null)
+    expect(r.valid).toBe(false)
+    expect(r.level).toBeNull()
+    expect(r.message).toBeTruthy()
+  })
+
+  it('validatePsicCode rejects oversized codes', () => {
+    const r = validatePsicCode('620111')
+    expect(r.valid).toBe(false)
+    expect(r.message).toBeTruthy()
+  })
+
+  it('validatePsicCode rejects malformed code patterns', () => {
+    expect(validatePsicCode('AB').valid).toBe(false)    // two letters
+    expect(validatePsicCode('6201A').valid).toBe(false) // alpha in numeric
+    expect(validatePsicCode('1').valid).toBe(false)     // single digit (not a section letter)
+    expect(validatePsicCode('!@#').valid).toBe(false)   // special chars
+  })
+
+  it('validatePsicCode returns level for format-valid but unknown codes', () => {
+    const r = validatePsicCode('99999')
+    expect(r.valid).toBe(false)
+    expect(r.level).toBe('subclass') // format matched, not in dataset
+    expect(r.message).toBeTruthy()
+  })
+
+  // ─── Security: getNode / getPath hardening ────────────────────────────────
+
+  it('getNode returns null for empty string', () => {
+    expect(getNode('')).toBeNull()
+  })
+
+  it('getNode returns null for strings longer than 5 chars', () => {
+    expect(getNode('ABCDEF')).toBeNull()
+    expect(getNode('123456')).toBeNull()
+  })
+
+  it('getPath returns null for invalid / empty codes', () => {
+    expect(getPath('')).toBeNull()
+    expect(getPath('999999')).toBeNull()
+    expect(getPath('!!')).toBeNull()
+  })
+
+  // ─── Security: dataset integrity ──────────────────────────────────────────
+
+  it('all flat entries have non-empty codes and names', () => {
+    const entries = getFlatEntries()
+    for (const entry of entries) {
+      expect(entry.section_code).toBeTruthy()
+      expect(entry.division_code).toBeTruthy()
+      expect(entry.group_code).toBeTruthy()
+      expect(entry.class_code).toBeTruthy()
+      expect(entry.subclass_code).toBeTruthy()
+      expect(entry.section_name).toBeTruthy()
+      expect(entry.subclass_name).toBeTruthy()
+    }
+  })
+
+  it('dataset has no duplicate subclass codes', () => {
+    const codes = getFlatEntries().map((e) => e.subclass_code)
+    const unique = new Set(codes)
+    expect(unique.size).toBe(codes.length)
+  })
+
+  it('all hierarchy codes match expected format patterns', () => {
+    for (const section of getDataset().sections) {
+      expect(section.code).toMatch(/^[A-U]$/)
+      for (const division of section.divisions) {
+        expect(division.code).toMatch(/^\d{2}$/)
+        for (const group of division.groups) {
+          expect(group.code).toMatch(/^\d{3}$/)
+          for (const cls of group.classes) {
+            expect(cls.code).toMatch(/^\d{4}$/)
+            for (const sub of cls.subclasses) {
+              expect(sub.code).toMatch(/^\d{5}$/)
+            }
+          }
+        }
+      }
+    }
+  })
+
+  it('all subclass parent-child relationships are consistent', () => {
+    for (const section of getDataset().sections) {
+      for (const division of section.divisions) {
+        for (const group of division.groups) {
+          for (const cls of group.classes) {
+            for (const sub of cls.subclasses) {
+              expect(sub.code.startsWith(cls.code)).toBe(true)
+            }
+            expect(cls.code.startsWith(group.code)).toBe(true)
+          }
+          expect(group.code.startsWith(division.code)).toBe(true)
+        }
+      }
+    }
+  })
+
+  // ─── Security: constants are exported ────────────────────────────────────
+
+  it('PSIC_MAX_QUERY_LENGTH is a positive integer', () => {
+    expect(typeof PSIC_MAX_QUERY_LENGTH).toBe('number')
+    expect(PSIC_MAX_QUERY_LENGTH).toBeGreaterThan(0)
+    expect(Number.isInteger(PSIC_MAX_QUERY_LENGTH)).toBe(true)
+  })
+
+  it('PSIC_MAX_RESULT_LIMIT is a positive integer', () => {
+    expect(typeof PSIC_MAX_RESULT_LIMIT).toBe('number')
+    expect(PSIC_MAX_RESULT_LIMIT).toBeGreaterThan(0)
+    expect(Number.isInteger(PSIC_MAX_RESULT_LIMIT)).toBe(true)
   })
 })
