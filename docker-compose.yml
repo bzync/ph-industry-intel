@@ -8,10 +8,10 @@ services:
       - "8092:80"
     restart: unless-stopped
     networks:
-      - ph_industry_intel_net
-      - proxy_manager_net
+      - ph-industry-intel-network
+      - proxy-network
 
 networks:
-  ph_industry_intel_net:
-  proxy_manager_net:
+  ph-industry-intel-network:
+  proxy-network:
     external: true
