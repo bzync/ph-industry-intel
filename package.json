@@ -60,7 +60,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "generate:psic-data": "tsx scripts/prepare-psic-data.ts",
-    "release:patch": "npm version patch && git push --follow-tags && npm publish --access public --provenance=false"
+    "release:patch": "npm run build && npm version patch && git push --follow-tags && npm publish --access public --provenance=false"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
